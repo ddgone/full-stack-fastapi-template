@@ -46,11 +46,13 @@ services:
       - default
 
   db:
+    image: postgres:17
     restart: "no"
     ports:
       - "5432:5432"
 
   adminer:
+    image: adminer
     restart: "no"
     ports:
       - "8080:8080"
