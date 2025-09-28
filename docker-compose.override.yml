@@ -56,6 +56,8 @@ services:
       - "8080:8080"
 
   backend:
+    # 覆盖主配置中的 image，使用本地标签
+    image: local-backend:latest
     restart: "no"
     ports:
       - "8000:8000"
@@ -93,14 +95,21 @@ services:
       - "1025:1025"
 
   frontend:
+    # 覆盖主配置中的 image，使用本地标签
+    image: local-backend:latest
     restart: "no"
     ports:
-      - "5173:80"
+      - "5173:5173"  # 映射开发端口
     build:
       context: ./frontend
+      target: development  # 使用开发阶段
       args:
-        - VITE_API_URL=http://localhost:8000
-        - NODE_ENV=development
+        - VITE_API_URL=http://localhost:8000  # 开发环境API地址
+    volumes:
+      - ./frontend:/app  # 本地代码实时同步到容器
+      - /app/node_modules  # 排除本地node_modules，使用容器内依赖
+    environment:
+      - WATCHPACK_POLLING=true  # 解决跨系统文件监听问题（如macOS）
 
   playwright:
     build:

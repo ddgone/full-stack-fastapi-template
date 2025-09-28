@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   viewBox="0 0 400 120"
+   width="400"
+   height="120">
+
+  <title>TestFlow Logo</title>
+  <desc>Modern testing automation platform</desc>
+
+  <!-- 图标部分 - 抽象化测试流程 -->
+  <g transform="translate(20, 20)">
+    <!-- 流动线条 -->
+    <path d="M20,50 C40,30 60,70 80,50" stroke="#4A90E2" stroke-width="8" stroke-linecap="round" fill="none"/>
+
+    <!-- 测试节点 -->
+    <circle cx="20" cy="50" r="8" fill="#4A90E2"/>
+    <circle cx="50" cy="30" r="8" fill="#4A90E2"/>
+    <circle cx="80" cy="50" r="8" fill="#4A90E2"/>
+
+    <!-- 箭头元素 -->
+    <path d="M90,50 L100,50 L95,45 M100,50 L95,55" stroke="#4A90E2" stroke-width="2" fill="none"/>
+  </g>
+
+  <!-- 文字部分 -->
+  <g transform="translate(120, 30)" font-family="Arial" font-weight="bold">
+    <!-- 主文字 -->
+    <text x="0" y="40" font-size="42" fill="#2C3E50">Test</text>
+    <text x="100" y="40" font-size="42" fill="#4A90E2">Flow</text>
+
+    <!-- 副标题 -->
+    <text x="0" y="70" font-size="16" fill="#7F8C8D">Automation Testing Platform</text>
+  </g>
+</svg>
