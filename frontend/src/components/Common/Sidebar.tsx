@@ -16,77 +16,109 @@ import {
 } from "../ui/drawer"
 import SidebarItems from "./SidebarItems"
 
+/**
+ * 侧边栏组件
+ *
+ * 提供响应式侧边栏，在移动端显示为抽屉式菜单，在桌面端显示为固定侧边栏
+ */
 const Sidebar = () => {
+  // 查询客户端实例
   const queryClient = useQueryClient()
+
+  // 获取当前用户信息
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
+
+  // 认证钩子（包含登出功能）
   const { logout } = useAuth()
+
+  // 抽屉菜单打开状态
   const [open, setOpen] = useState(false)
 
   return (
     <>
-      {/* Mobile */}
+      {/* 移动端视图（抽屉式菜单） */}
       <DrawerRoot
-        placement="start"
-        open={open}
-        onOpenChange={(e) => setOpen(e.open)}
+        placement="start" // 从左侧滑出
+        open={open} // 控制打开状态
+        onOpenChange={({ open }) => setOpen(open)} // 状态变化回调
       >
+        {/* 抽屉背景遮罩 */}
         <DrawerBackdrop />
+
+        {/* 抽屉触发按钮（汉堡菜单图标） */}
         <DrawerTrigger asChild>
           <IconButton
-            variant="ghost"
-            color="inherit"
-            display={{ base: "flex", md: "none" }}
-            aria-label="Open Menu"
-            position="absolute"
-            zIndex="100"
-            m={4}
+            variant="ghost" // 透明背景
+            color="inherit" // 继承颜色
+            display={{ base: "flex", md: "none" }} // 仅在小屏幕显示
+            aria-label="打开菜单" // 无障碍标签
+            position="absolute" // 绝对定位
+            zIndex="100" // 层级
+            m={4} // 外边距
           >
-            <FaBars />
+            <FaBars /> {/* 汉堡菜单图标 */}
           </IconButton>
         </DrawerTrigger>
-        <DrawerContent maxW="xs">
+
+        {/* 抽屉内容 */}
+        <DrawerContent maxW="xs"> {/* 最大宽度 */}
+          {/* 抽屉关闭触发器 */}
           <DrawerCloseTrigger />
+
           <DrawerBody>
+            {/* 抽屉内容布局 */}
             <Flex flexDir="column" justify="space-between">
               <Box>
+                {/* 侧边栏菜单项 */}
                 <SidebarItems onClose={() => setOpen(false)} />
+
+                {/* 登出按钮 */}
                 <Flex
-                  as="button"
+                  as="button" // 渲染为按钮
                   onClick={() => {
-                    logout()
+                    logout() // 执行登出
                   }}
-                  alignItems="center"
-                  gap={4}
-                  px={4}
-                  py={2}
+                  alignItems="center" // 垂直居中
+                  gap={4} // 元素间距
+                  px={4} // 水平内边距
+                  py={2} // 垂直内边距
                 >
-                  <FiLogOut />
-                  <Text>Log Out</Text>
+                  <FiLogOut /> {/* 登出图标 */}
+                  <Text>登出</Text>
                 </Flex>
               </Box>
+
+              {/* 当前用户信息 */}
               {currentUser?.email && (
-                <Text fontSize="sm" p={2} truncate maxW="sm">
-                  Logged in as: {currentUser.email}
+                <Text
+                  fontSize="sm" // 小号字体
+                  p={2} // 内边距
+                  truncate // 文本截断
+                  maxW="sm" // 最大宽度
+                >
+                  登录账号: {currentUser.email}
                 </Text>
               )}
             </Flex>
           </DrawerBody>
+
+          {/* 抽屉关闭触发器（底部） */}
           <DrawerCloseTrigger />
         </DrawerContent>
       </DrawerRoot>
 
-      {/* Desktop */}
-
+      {/* 桌面端视图（固定侧边栏） */}
       <Box
-        display={{ base: "none", md: "flex" }}
-        position="sticky"
-        bg="bg.subtle"
-        top={0}
-        minW="xs"
-        h="100vh"
-        p={4}
+        display={{ base: "none", md: "flex" }} // 仅在中大屏幕显示
+        position="sticky" // 粘性定位
+        bg="bg.subtle" // 背景颜色
+        top={0} // 顶部贴边
+        minW="xs" // 最小宽度
+        h="100vh" // 全屏高度
+        p={4} // 内边距
       >
         <Box w="100%">
+          {/* 侧边栏菜单项 */}
           <SidebarItems />
         </Box>
       </Box>

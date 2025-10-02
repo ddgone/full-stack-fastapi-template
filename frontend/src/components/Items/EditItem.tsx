@@ -26,103 +26,148 @@ import {
 } from "../ui/dialog"
 import { Field } from "../ui/field"
 
+/**
+ * 编辑项目组件属性
+ *
+ * @property item 要编辑的项目对象
+ */
 interface EditItemProps {
   item: ItemPublic
 }
 
+/**
+ * 项目更新表单类型
+ *
+ * 定义编辑项目时需要的字段
+ */
 interface ItemUpdateForm {
   title: string
   description?: string
 }
 
+/**
+ * 编辑项目组件
+ *
+ * 提供一个对话框表单用于编辑现有项目信息
+ *
+ * @param item 要编辑的项目对象
+ */
 const EditItem = ({ item }: EditItemProps) => {
+  // 对话框打开状态
   const [isOpen, setIsOpen] = useState(false)
+
+  // 查询客户端实例
   const queryClient = useQueryClient()
+
+  // 自定义Toast通知
   const { showSuccessToast } = useCustomToast()
+
+  // 表单管理
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ItemUpdateForm>({
-    mode: "onBlur",
-    criteriaMode: "all",
+    mode: "onBlur", // 在失去焦点时验证
+    criteriaMode: "all", // 验证所有规则
     defaultValues: {
-      ...item,
-      description: item.description ?? undefined,
+      ...item, // 使用项目数据初始化表单
+      description: item.description ?? undefined, // 处理可能的空值
     },
   })
 
+  // 更新项目Mutation
   const mutation = useMutation({
     mutationFn: (data: ItemUpdateForm) =>
-      ItemsService.updateItem({ id: item.id, requestBody: data }),
+      ItemsService.updateItem({
+        id: item.id, // 项目ID
+        requestBody: data // 更新数据
+      }),
     onSuccess: () => {
-      showSuccessToast("Item updated successfully.")
-      reset()
-      setIsOpen(false)
+      // 更新成功处理
+      showSuccessToast("项目更新成功")
+      reset() // 重置表单
+      setIsOpen(false) // 关闭对话框
     },
     onError: (err: ApiError) => {
+      // 错误处理
       handleError(err)
     },
     onSettled: () => {
+      // 无论成功失败都刷新项目列表
       queryClient.invalidateQueries({ queryKey: ["items"] })
     },
   })
 
+  /**
+   * 表单提交处理函数
+   * @param data 表单数据
+   */
   const onSubmit: SubmitHandler<ItemUpdateForm> = async (data) => {
     mutation.mutate(data)
   }
 
   return (
     <DialogRoot
-      size={{ base: "xs", md: "md" }}
-      placement="center"
-      open={isOpen}
-      onOpenChange={({ open }) => setIsOpen(open)}
+      size={{ base: "xs", md: "md" }} // 响应式尺寸
+      placement="center" // 居中显示
+      open={isOpen} // 控制打开状态
+      onOpenChange={({ open }) => setIsOpen(open)} // 状态变化回调
     >
+      {/* 对话框触发按钮 */}
       <DialogTrigger asChild>
         <Button variant="ghost">
           <FaExchangeAlt fontSize="16px" />
-          Edit Item
+          编辑项目
         </Button>
       </DialogTrigger>
+
+      {/* 对话框内容 */}
       <DialogContent>
+        {/* 表单容器 */}
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>Edit Item</DialogTitle>
+            <DialogTitle>编辑项目</DialogTitle>
           </DialogHeader>
+
           <DialogBody>
-            <Text mb={4}>Update the item details below.</Text>
+            <Text mb={4}>请在下方更新项目信息</Text>
+
+            {/* 表单字段组 */}
             <VStack gap={4}>
+              {/* 标题字段 */}
               <Field
-                required
-                invalid={!!errors.title}
-                errorText={errors.title?.message}
-                label="Title"
+                required // 必填字段
+                invalid={!!errors.title} // 错误状态
+                errorText={errors.title?.message} // 错误消息
+                label="标题" // 字段标签
               >
                 <Input
                   {...register("title", {
-                    required: "Title is required",
+                    required: "标题是必填项", // 必填验证
                   })}
-                  placeholder="Title"
-                  type="text"
+                  placeholder="标题" // 占位文本
+                  type="text" // 输入类型
                 />
               </Field>
 
+              {/* 描述字段 */}
               <Field
                 invalid={!!errors.description}
                 errorText={errors.description?.message}
-                label="Description"
+                label="描述"
               >
                 <Input
                   {...register("description")}
-                  placeholder="Description"
+                  placeholder="描述"
                   type="text"
                 />
               </Field>
             </VStack>
           </DialogBody>
 
+          {/* 对话框底部操作按钮 */}
           <DialogFooter gap={2}>
             <ButtonGroup>
               <DialogActionTrigger asChild>
@@ -131,15 +176,21 @@ const EditItem = ({ item }: EditItemProps) => {
                   colorPalette="gray"
                   disabled={isSubmitting}
                 >
-                  Cancel
+                  取消
                 </Button>
               </DialogActionTrigger>
-              <Button variant="solid" type="submit" loading={isSubmitting}>
-                Save
+              <Button
+                variant="solid"
+                type="submit"
+                loading={isSubmitting}
+              >
+                保存
               </Button>
             </ButtonGroup>
           </DialogFooter>
         </form>
+
+        {/* 对话框关闭触发器 */}
         <DialogCloseTrigger />
       </DialogContent>
     </DialogRoot>
