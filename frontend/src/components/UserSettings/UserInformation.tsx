@@ -22,11 +22,18 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { emailPattern, handleError } from "@/utils"
 import { Field } from "../ui/field"
 
+/**
+ * 用户信息组件
+ *
+ * 显示和编辑当前登录用户的基本信息
+ */
 const UserInformation = () => {
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
-  const [editMode, setEditMode] = useState(false)
-  const { user: currentUser } = useAuth()
+  const [editMode, setEditMode] = useState(false) // 编辑模式状态
+  const { user: currentUser } = useAuth() // 获取当前用户信息
+
+  // 表单管理
   const {
     register,
     handleSubmit,
@@ -34,52 +41,64 @@ const UserInformation = () => {
     getValues,
     formState: { isSubmitting, errors, isDirty },
   } = useForm<UserPublic>({
-    mode: "onBlur",
-    criteriaMode: "all",
+    mode: "onBlur", // 在失去焦点时验证
+    criteriaMode: "all", // 验证所有规则
     defaultValues: {
-      full_name: currentUser?.full_name,
-      email: currentUser?.email,
+      full_name: currentUser?.full_name, // 默认值：用户全名
+      email: currentUser?.email, // 默认值：用户邮箱
     },
   })
 
+  /**
+   * 切换编辑模式
+   */
   const toggleEditMode = () => {
     setEditMode(!editMode)
   }
 
+  // 更新用户信息的Mutation
   const mutation = useMutation({
     mutationFn: (data: UserUpdateMe) =>
-      UsersService.updateUserMe({ requestBody: data }),
+      UsersService.updateUserMe({ requestBody: data }), // 调用更新用户API
     onSuccess: () => {
-      showSuccessToast("User updated successfully.")
+      showSuccessToast("用户信息更新成功") // 显示成功提示
     },
     onError: (err: ApiError) => {
-      handleError(err)
+      handleError(err) // 处理错误
     },
     onSettled: () => {
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries() // 刷新所有查询
     },
   })
 
+  /**
+   * 表单提交处理函数
+   * @param data 表单数据
+   */
   const onSubmit: SubmitHandler<UserUpdateMe> = async (data) => {
-    mutation.mutate(data)
+    mutation.mutate(data) // 提交更新
   }
 
+  /**
+   * 取消编辑
+   */
   const onCancel = () => {
-    reset()
-    toggleEditMode()
+    reset() // 重置表单
+    toggleEditMode() // 退出编辑模式
   }
 
   return (
     <Container maxW="full">
       <Heading size="sm" py={4}>
-        User Information
+        用户信息
       </Heading>
       <Box
         w={{ sm: "full", md: "sm" }}
         as="form"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <Field label="Full name">
+        {/* 全名字段 */}
+        <Field label="姓名">
           {editMode ? (
             <Input
               {...register("full_name", { maxLength: 30 })}
@@ -94,20 +113,22 @@ const UserInformation = () => {
               truncate
               maxW="sm"
             >
-              {currentUser?.full_name || "N/A"}
+              {currentUser?.full_name || "未设置"}
             </Text>
           )}
         </Field>
+
+        {/* 邮箱字段 */}
         <Field
           mt={4}
-          label="Email"
+          label="邮箱"
           invalid={!!errors.email}
           errorText={errors.email?.message}
         >
           {editMode ? (
             <Input
               {...register("email", {
-                required: "Email is required",
+                required: "邮箱是必填项",
                 pattern: emailPattern,
               })}
               type="email"
@@ -119,6 +140,8 @@ const UserInformation = () => {
             </Text>
           )}
         </Field>
+
+        {/* 操作按钮 */}
         <Flex mt={4} gap={3}>
           <Button
             variant="solid"
@@ -127,7 +150,7 @@ const UserInformation = () => {
             loading={editMode ? isSubmitting : false}
             disabled={editMode ? !isDirty || !getValues("email") : false}
           >
-            {editMode ? "Save" : "Edit"}
+            {editMode ? "保存" : "编辑"}
           </Button>
           {editMode && (
             <Button
@@ -136,7 +159,7 @@ const UserInformation = () => {
               onClick={onCancel}
               disabled={isSubmitting}
             >
-              Cancel
+              取消
             </Button>
           )}
         </Flex>
