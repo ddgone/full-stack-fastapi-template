@@ -2,7 +2,10 @@
 import uuid
 from pydantic import EmailStr
 from sqlmodel import SQLModel, Field, Relationship
-from items import Item
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from items import Item
 
 
 # 共享属性

@@ -1,6 +1,10 @@
 # items相关模型
 import uuid
 from sqlmodel import SQLModel, Field, Relationship
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from users import User
 
 
 class ItemBase(SQLModel):
