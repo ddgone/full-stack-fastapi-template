@@ -3,6 +3,8 @@ import uuid
 from sqlmodel import SQLModel, Field, Relationship
 from typing import TYPE_CHECKING
 
+# 注意：由于 PyCharm 2025.2 对字符串引用的支持存在 bug
+# 使用 TYPE_CHECKING 导入作为临时解决方案
 if TYPE_CHECKING:
     from users import User
 

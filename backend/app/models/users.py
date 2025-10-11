@@ -4,6 +4,8 @@ from pydantic import EmailStr
 from sqlmodel import SQLModel, Field, Relationship
 from typing import TYPE_CHECKING
 
+# 注意：由于 PyCharm 2025.2 对字符串引用的支持存在 bug
+# 使用 TYPE_CHECKING 导入作为临时解决方案
 if TYPE_CHECKING:
     from items import Item
 
@@ -48,3 +50,13 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+
+
+# 通过 API 返回的属性，id 始终为必填项
+class UserPublic(UserBase):
+    id: uuid.UUID
+
+
+class UsersPublic(SQLModel):
+    data: list[UserPublic]
+    count: int
