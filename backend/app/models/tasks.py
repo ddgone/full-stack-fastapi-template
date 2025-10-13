@@ -1,16 +1,11 @@
 import uuid
 
 from datetime import datetime, timezone
-from sqlmodel import (
-    SQLModel,
-    Field,
-    Relationship,
-    Table,
-    Column,
-    ForeignKey
-)
+from sqlmodel import SQLModel, Field, Relationship
 from typing import TYPE_CHECKING
 from enum import Enum
+
+from app.models.associations import task_collaborator_association
 
 # 注意：由于 PyCharm 2025.2 对字符串引用的支持存在 bug
 # 使用 TYPE_CHECKING 导入作为临时解决方案
@@ -54,15 +49,6 @@ class TaskUpdate(TaskBase):
     status: TaskStatus | None = None
     priority: TaskPriority | None = None
     due_date: datetime | None = None
-
-
-# 任务协作者关联表 - 多对多关系表
-task_collaborator_association = Table(
-    "task_collaborator_association",
-    SQLModel.metadata,
-    Column("task_id", ForeignKey("task.id"), primary_key=True),  # 任务ID，作为主键之一
-    Column("user_id", ForeignKey("user.id"), primary_key=True),  # 用户ID，作为主键之一
-)
 
 
 # 任务表task - 数据库实际存储的模型

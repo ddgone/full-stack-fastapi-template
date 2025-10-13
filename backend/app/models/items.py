@@ -1,21 +1,16 @@
 # items相关模型
 import uuid
-from sqlmodel import (
-    SQLModel,
-    Field,
-    Relationship,
-    Table,
-    Column,
-    ForeignKey
-)
+from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
+
+from app.models.associations import item_collaborator_association
 
 # 注意：由于 PyCharm 2025.2 对字符串引用的支持存在 bug
 # 使用 TYPE_CHECKING 导入作为临时解决方案
 if TYPE_CHECKING:
-    from users import User
-    from tasks import Task
+    from app.models.users import User
+    from app.models.tasks import Task
 
 
 class ItemBase(SQLModel):
@@ -31,15 +26,6 @@ class ItemCreate(ItemBase):
 # 更新项目时接收的属性
 class ItemUpdate(ItemBase):
     title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
-
-
-# 项目协作者关联表 - 多对多关系表
-item_collaborator_association = Table(
-    "item_collaborator_association",
-    SQLModel.metadata,
-    Column("item_id", ForeignKey("item.id"), primary_key=True),  # 项目ID，作为主键之一
-    Column("user_id", ForeignKey("user.id"), primary_key=True),  # 用户ID，作为主键之一
-)
 
 
 # 数据库模型，生成item表，用于保存项目信息
