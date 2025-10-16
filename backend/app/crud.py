@@ -5,8 +5,13 @@ from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
 
-from app.models.users import User, UserCreate, UserUpdate
-from app.models.items import Item, ItemCreate
+from app.models import (
+    User,
+    UserCreate,
+    UserUpdate,
+    Item,
+    ItemCreate
+)
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:

@@ -1,7 +1,12 @@
 from datetime import timedelta
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Request
+)
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -10,9 +15,14 @@ from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
+from app.core.rate_limiter import init_rate_limiter
 
-from app.models.common import Message, NewPassword, Token
-from app.models.users import UserPublic
+from app.models import (
+    Message,
+    NewPassword,
+    Token,
+    UserPublic
+)
 from app.utils import (
     generate_password_reset_token,
     generate_reset_password_email,
@@ -20,15 +30,19 @@ from app.utils import (
     verify_password_reset_token,
 )
 
+limiter = init_rate_limiter()
 router = APIRouter(tags=["login"])
 
 
 @router.post("/login/access-token")
+@limiter.limit("5/minute")  # 限流
 def login_access_token(
-    session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+        request: Request,  # noqa: F841 # Request参数供限流器使用
+        session: SessionDep,
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> Token:
     """
-    OAuth2 compatible token login, get an access token for future requests
+    OAuth2 兼容的令牌登录，获取访问令牌供后续请求使用
     """
     user = crud.authenticate(
         session=session, email=form_data.username, password=form_data.password

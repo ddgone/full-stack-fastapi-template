@@ -5,8 +5,14 @@ from fastapi import APIRouter, HTTPException
 from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models.items import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate
-from app.models.common import Message
+from app.models import (
+    Item,
+    ItemCreate,
+    ItemPublic,
+    ItemsPublic,
+    ItemUpdate,
+    Message
+)
 
 router = APIRouter(prefix="/items", tags=["items"])
 
@@ -16,7 +22,7 @@ def read_items(
         session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
 ) -> Any:
     """
-    Retrieve items.
+    检索项目.
     """
 
     if current_user.is_superuser:
