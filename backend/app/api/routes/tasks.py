@@ -7,6 +7,7 @@ from app.api.deps import CurrentUser, SessionDep
 from app.models import (
     TaskPublic,
     TaskCreate,
+    TaskUpdate,
     Task,
     Item
 )
@@ -21,7 +22,7 @@ def create_task(
         item_id: uuid.UUID,
         task_data: TaskCreate
 ) -> Any:
-    # 检查用户是否有权限在 item 下创建任务
+    # 检查用户是否有权限在 item 下创建 task
     item = session.get(Item, item_id)
     if not item:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
@@ -39,3 +40,15 @@ def create_task(
     session.commit()
     session.refresh(task)
     return task
+
+
+@router.put("/{item_id}/tasks/{task_id}", response_model=TasksPublic)
+def update_task(
+        session: SessionDep,
+        current_user: CurrentUser,
+        item_id: uuid.UUID,
+        task_id: uuid.UUID,
+        task_data: TaskUpdate
+) -> Any:
+    # 检查用户是否有权限更新 task
+    item = session.get(Item, item_id)

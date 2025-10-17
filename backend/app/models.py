@@ -2,24 +2,26 @@ import uuid
 
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Optional
 from enum import Enum
+
+from app.utils import get_beijing_time
 
 
 # ==================== 枚举类型定义 ====================
 class TaskStatus(str, Enum):
     """任务状态枚举"""
-    PENDING = "pending"  # 待处理
-    IN_PROGRESS = "in_progress"  # 进行中
-    COMPLETED = "completed"  # 已完成
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
 
 
 class TaskPriority(str, Enum):
     """任务优先级枚举"""
-    LOW = "low"  # 低优先级
-    MEDIUM = "medium"  # 中优先级
-    HIGH = "high"  # 高优先级
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
 
 
 # ==================== 关联表模型 ====================
@@ -38,50 +40,46 @@ class ItemCollaboratorLink(SQLModel, table=True):
 
 
 # ==================== 用户相关模型 ====================
-# 共享属性 - 定义用户的基本字段
 class UserBase(SQLModel):
-    email: EmailStr = Field(unique=True, index=True, max_length=255)  # 用户邮箱，唯一且建立索引，最大长度255
-    is_active: bool = True  # 用户是否激活，默认为True
-    is_superuser: bool = False  # 是否为超级用户，默认为False
-    full_name: str | None = Field(default=None, max_length=255)  # 用户全名，最大长度255
+    email: EmailStr = Field(unique=True, index=True, max_length=255, description="用户邮箱")
+    is_active: bool = Field(default=True, description="账户激活状态")
+    is_superuser: bool = Field(default=False, description="管理员权限")
+    full_name: str | None = Field(default=None, max_length=255, description="用户全名")
 
 
-# 创建时需通过 API 接收的属性
 class UserCreate(UserBase):
-    password: str = Field(min_length=8, max_length=128)  # 用户密码，长度8-128字符
+    password: str = Field(min_length=8, max_length=128, description="用户密码")
 
 
 class UserRegister(SQLModel):
-    email: EmailStr = Field(max_length=255)  # 注册邮箱，最大长度255
-    password: str = Field(min_length=8, max_length=128)  # 注册密码，长度8-128字符
-    full_name: str | None = Field(default=None, max_length=255)  # 用户全名，最大长度255
+    email: EmailStr = Field(max_length=255, description="注册邮箱")
+    password: str = Field(min_length=8, max_length=128, description="注册密码")
+    full_name: str | None = Field(default=None, max_length=255, description="用户全名")
 
 
-# 更新时需通过 API 接收的属性，所有属性均为可选
 class UserUpdate(UserBase):
-    email: EmailStr | None = Field(default=None, max_length=255)  # 可选的邮箱更新
-    password: str | None = Field(default=None, min_length=8, max_length=128)  # 可选的密码更新
+    email: EmailStr | None = Field(default=None, max_length=255, description="更新邮箱")
+    password: str | None = Field(default=None, min_length=8, max_length=128, description="更新密码")
 
 
 class UserUpdateMe(SQLModel):
-    full_name: str | None = Field(default=None, max_length=255)  # 用户自己更新全名
-    email: EmailStr | None = Field(default=None, max_length=255)  # 用户自己更新邮箱
+    full_name: str | None = Field(default=None, max_length=255, description="更新全名")
+    email: EmailStr | None = Field(default=None, max_length=255, description="更新邮箱")
 
 
 class UpdatePassword(SQLModel):
-    current_password: str = Field(min_length=8, max_length=128)  # 当前密码，用于验证
-    new_password: str = Field(min_length=8, max_length=128)  # 新密码，长度8-128字符
+    current_password: str = Field(min_length=8, max_length=128, description="当前密码")
+    new_password: str = Field(min_length=8, max_length=128, description="新密码")
 
 
 # 数据库模型，生成user表
 class User(UserBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)  # 主键，使用UUID
-    hashed_password: str = Field(max_length=255)  # 存储哈希后的密码
-    items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)  # 与Item的关系，级联删除
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, description="用户ID")
+    hashed_password: str = Field(max_length=255, description="密码哈希值")
+    items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)  # 与 Item 的关系，级联删除
+    owned_tasks: list["Task"] = Relationship(back_populates="owner")  # 与 Task 的关系
 
-    # 添加新关系
-    owned_tasks: list["Task"] = Relationship(back_populates="owner")
-
+    # 协作者关系 - 多对多
     collaborated_items: list["Item"] = Relationship(
         back_populates="collaborators",
         link_model=ItemCollaboratorLink
@@ -92,51 +90,41 @@ class User(UserBase, table=True):
     )
 
 
-# 通过 API 返回的属性，id 始终为必填项
 class UserPublic(UserBase):
-    id: uuid.UUID  # 公开的用户信息，包含用户ID
+    id: uuid.UUID = Field(description="用户ID")
 
 
 class UsersPublic(SQLModel):
-    data: list[UserPublic]  # 用户列表数据
-    count: int  # 用户总数
+    data: list[UserPublic] = Field(description="用户列表")
+    count: int = Field(description="用户总数")
 
 
 # ==================== 项目相关模型 ====================
-# 共享属性
 class ItemBase(SQLModel):
-    title: str = Field(min_length=1, max_length=255)  # 项目标题，长度1-255字符
-    description: str | None = Field(default=None, max_length=255)  # 项目描述，最多255字符
+    title: str = Field(min_length=1, max_length=255, description="项目标题")
+    description: str | None = Field(default=None, max_length=255, description="项目描述")
 
 
-# 创建项目时接收的属性
 class ItemCreate(ItemBase):
     pass
 
 
-# 更新项目时接收的属性
 class ItemUpdate(ItemBase):
-    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+    title: str | None = Field(default=None, min_length=1, max_length=255, description="更新标题")
 
 
-# 数据库模型，生成item表，用于保存项目信息
+# 数据库模型，生成item表
 class Item(ItemBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)  # 主键，使用UUID
-    owner_id: uuid.UUID = Field(
-        foreign_key="user.id", nullable=False, ondelete="CASCADE"  # 外键关联用户，级联删除
-    )
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, description="项目ID")
+    owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE", description="所有者ID")
     owner: Optional["User"] = Relationship(back_populates="items")  # 与User模型的关系
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))  # 创建时间，默认为当前UTC时间
+    created_at: datetime = Field(default_factory=get_beijing_time, description="创建时间")
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={
-            "onupdate": lambda: datetime.now(timezone.utc),  # 更新时自动更新时间戳
-        }
+        default_factory=get_beijing_time,
+        sa_column_kwargs={"onupdate": get_beijing_time},
+        description="更新时间"
     )
-
-    # 关系定义
-    tasks: list["Task"] = Relationship(back_populates="item")  # 与Task模型关系
-
+    tasks: list["Task"] = Relationship(back_populates="item")  # 与 Task 的关系
     # 协作者关系 - 多对多
     collaborators: list["User"] = Relationship(
         back_populates="collaborated_items",
@@ -144,58 +132,50 @@ class Item(ItemBase, table=True):
     )
 
 
-# 通过 API 返回的属性，id 始终必需
 class ItemPublic(ItemBase):
-    id: uuid.UUID  # 项目ID
-    owner_id: uuid.UUID  # 所有者ID
+    id: uuid.UUID = Field(description="项目ID")
+    owner_id: uuid.UUID = Field(description="所有者ID")
 
 
 class ItemsPublic(SQLModel):
-    data: list[ItemPublic]  # 项目列表数据
-    count: int  # 项目总数
+    data: list[ItemPublic] = Field(description="项目列表")
+    count: int = Field(description="项目总数")
 
 
 # ==================== 任务相关模型 ====================
-# 共享属性 - 定义了任务的基本字段
 class TaskBase(SQLModel):
-    title: str = Field(min_length=1, max_length=255)  # 任务标题，长度1-255字符
-    description: str | None = Field(default=None, max_length=1000)  # 任务描述，最多1000字符
-    status: TaskStatus = Field(default=TaskStatus.PENDING, index=True)  # 任务状态，默认为待处理，并建立索引
-    priority: TaskPriority = Field(default=TaskPriority.MEDIUM, index=True)  # 任务优先级，默认为中，并建立索引
-    due_date: datetime | None = None  # 截止日期
+    title: str = Field(min_length=1, max_length=255, description="任务标题")
+    description: str | None = Field(default=None, max_length=1000, description="任务描述")
+    status: TaskStatus = Field(default=TaskStatus.PENDING, index=True, description="任务状态，默认为待处理")
+    priority: TaskPriority = Field(default=TaskPriority.MEDIUM, index=True, description="任务优先级，默认为中")
+    due_date: datetime | None = Field(default=None, description="截止日期")
 
 
-# 用于创建任务的模型
 class TaskCreate(TaskBase):
     pass
 
 
-# 用于更新任务的模型，所有字段都是可选的
 class TaskUpdate(TaskBase):
-    title: str | None = Field(default=None, min_length=1, max_length=255)
-    description: str | None = Field(default=None, max_length=1000)
-    status: TaskStatus | None = None
-    priority: TaskPriority | None = None
-    due_date: datetime | None = None
+    title: str | None = Field(default=None, min_length=1, max_length=255, description="更新标题")
+    description: str | None = Field(default=None, max_length=1000, description="更新描述")
+    status: TaskStatus | None = Field(default=None, description="更新状态")
+    priority: TaskPriority | None = Field(default=None, description="更新优先级")
+    due_date: datetime | None = Field(default=None, description="更新截止日期")
 
 
-# 任务表task - 数据库实际存储的模型
+# 任务表 task
 class Task(TaskBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)  # 主键，使用UUID
-    item_id: uuid.UUID = Field(foreign_key="item.id")  # 关联的项目ID
-    owner_id: uuid.UUID = Field(foreign_key="user.id", index=True)  # 任务所有者ID，并建立索引
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))  # 创建时间，默认为当前UTC时间
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, description="任务ID")
+    item_id: uuid.UUID = Field(foreign_key="item.id", description="所属项目ID")
+    owner_id: uuid.UUID = Field(foreign_key="user.id", index=True, description="所有者ID")
+    created_at: datetime = Field(default_factory=get_beijing_time, description="创建时间")
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={
-            "onupdate": lambda: datetime.now(timezone.utc),  # 更新时自动更新时间戳
-        }
+        default_factory=get_beijing_time,
+        sa_column_kwargs={"onupdate": get_beijing_time},
+        description="更新时间"
     )
-
-    # 关系定义
-    item: "Item" = Relationship(back_populates="tasks")  # 与Item模型的关系
-    owner: "User" = Relationship(back_populates="owned_tasks")  # 与User模型的关系（任务所有者）
-
+    item: "Item" = Relationship(back_populates="tasks")  # 与 Item 的关系
+    owner: "User" = Relationship(back_populates="owned_tasks")  # 与 User 的关系
     # 协作者关系 - 多对多
     collaborators: list["User"] = Relationship(
         back_populates="collaborated_tasks",
@@ -203,40 +183,38 @@ class Task(TaskBase, table=True):
     )
 
 
-# 用于API响应的公开任务模型
 class TaskPublic(TaskBase):
-    id: uuid.UUID  # 任务ID
-    item_id: uuid.UUID  # 所属项目ID
-    owner_id: uuid.UUID  # 所有者ID
-    created_at: datetime  # 创建时间
-    updated_at: datetime  # 更新时间
-    collaborators: list["UserPublic"] = []  # 协作者列表
+    id: uuid.UUID = Field(description="任务ID")
+    item_id: uuid.UUID = Field(description="所属项目ID")
+    owner_id: uuid.UUID = Field(description="所有者ID")
+    created_at: datetime = Field(description="创建时间")
+    updated_at: datetime = Field(description="更新时间")
+    collaborators: list["UserPublic"] = Field(default=[], description="协作者列表")
 
 
-# 任务列表响应模型
 class TasksPublic(SQLModel):
-    data: list[TaskPublic]  # 任务列表数据
-    count: int  # 任务总数
+    data: list[TaskPublic] = Field(description="任务列表")
+    count: int = Field(description="任务总数")
 
 
 # ==================== 通用模型 ====================
 # 通用消息类 - 用于返回简单的消息响应
 class Message(SQLModel):
-    message: str  # 消息内容
+    message: str = Field(description="操作消息")
 
 
 # 包含访问令牌的 JSON 负载 - 用于认证响应
 class Token(SQLModel):
-    access_token: str  # JWT访问令牌
-    token_type: str = "bearer"  # 令牌类型，默认为bearer
+    access_token: str = Field(description="JWT访问令牌")
+    token_type: str = Field(default="bearer", description="令牌类型")
 
 
 # JWT 令牌内容 - 用于解析JWT令牌中的载荷信息
 class TokenPayload(SQLModel):
-    sub: str | None = None  # 主题(用户ID)，可为None
+    sub: str | None = Field(default=None, description="用户标识")
 
 
 # 新密码设置模型 - 用于重置密码功能
 class NewPassword(SQLModel):
-    token: str  # 重置密码令牌
-    new_password: str = Field(min_length=8, max_length=128)  # 新密码，长度8-128字符
+    token: str = Field(description="密码重置令牌")
+    new_password: str = Field(min_length=8, max_length=128, description="新密码")

@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import Any
 
@@ -121,3 +122,12 @@ def verify_password_reset_token(token: str) -> str | None:
         return str(decoded_token["sub"])
     except InvalidTokenError:
         return None
+
+
+# 获取 UTC+x 的时间，默认使用 UTC+8 时区
+def get_utc_time(time_zone: str = "Asia/Shanghai") -> datetime:
+    return datetime.now(timezone.utc).astimezone(ZoneInfo(time_zone)).replace(tzinfo=None)
+
+def get_beijing_time() -> datetime:
+    """获取北京时间 (UTC+8)"""
+    return get_utc_time("Asia/Shanghai")
