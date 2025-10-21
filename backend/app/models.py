@@ -33,9 +33,9 @@ class TaskCollaboratorLink(SQLModel, table=True):
 
 
 # 项目协作者关联表 - 多对多关系表
-class ItemCollaboratorLink(SQLModel, table=True):
-    __tablename__ = "item_collaborator_association"
-    item_id: uuid.UUID = Field(default=None, foreign_key="item.id", primary_key=True)
+class ProjectCollaboratorLink(SQLModel, table=True):
+    __tablename__ = "project_collaborator_association"
+    project_id: uuid.UUID = Field(default=None, foreign_key="project.id", primary_key=True)
     user_id: uuid.UUID = Field(default=None, foreign_key="user.id", primary_key=True)
 
 
@@ -76,13 +76,13 @@ class UpdatePassword(SQLModel):
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, description="用户ID")
     hashed_password: str = Field(max_length=255, description="密码哈希值")
-    items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)  # 与 Item 的关系，级联删除
+    projects: list["Project"] = Relationship(back_populates="owner", cascade_delete=True)  # 与 Project 的关系，级联删除
     owned_tasks: list["Task"] = Relationship(back_populates="owner")  # 与 Task 的关系
 
     # 协作者关系 - 多对多
-    collaborated_items: list["Item"] = Relationship(
+    collaborated_projects: list["Project"] = Relationship(
         back_populates="collaborators",
-        link_model=ItemCollaboratorLink
+        link_model=ProjectCollaboratorLink
     )
     collaborated_tasks: list["Task"] = Relationship(
         back_populates="collaborators",
@@ -100,45 +100,45 @@ class UsersPublic(SQLModel):
 
 
 # ==================== 项目相关模型 ====================
-class ItemBase(SQLModel):
+class ProjectBase(SQLModel):
     title: str = Field(min_length=1, max_length=255, description="项目标题")
     description: str | None = Field(default=None, max_length=255, description="项目描述")
 
 
-class ItemCreate(ItemBase):
+class ProjectCreate(ProjectBase):
     pass
 
 
-class ItemUpdate(ItemBase):
+class ProjectUpdate(ProjectBase):
     title: str | None = Field(default=None, min_length=1, max_length=255, description="更新标题")
 
 
-# 数据库模型，生成item表
-class Item(ItemBase, table=True):
+# 数据库模型，生成project表
+class Project(ProjectBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, description="项目ID")
     owner_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE", description="所有者ID")
-    owner: Optional["User"] = Relationship(back_populates="items")  # 与User模型的关系
+    owner: Optional["User"] = Relationship(back_populates="projects")  # 与User模型的关系
     created_at: datetime = Field(default_factory=get_beijing_time, description="创建时间")
     updated_at: datetime = Field(
         default_factory=get_beijing_time,
         sa_column_kwargs={"onupdate": get_beijing_time},
         description="更新时间"
     )
-    tasks: list["Task"] = Relationship(back_populates="item")  # 与 Task 的关系
+    tasks: list["Task"] = Relationship(back_populates="project")  # 与 Task 的关系
     # 协作者关系 - 多对多
     collaborators: list["User"] = Relationship(
-        back_populates="collaborated_items",
-        link_model=ItemCollaboratorLink
+        back_populates="collaborated_projects",
+        link_model=ProjectCollaboratorLink
     )
 
 
-class ItemPublic(ItemBase):
+class ProjectPublic(ProjectBase):
     id: uuid.UUID = Field(description="项目ID")
     owner_id: uuid.UUID = Field(description="所有者ID")
 
 
-class ItemsPublic(SQLModel):
-    data: list[ItemPublic] = Field(description="项目列表")
+class ProjectsPublic(SQLModel):
+    data: list[ProjectPublic] = Field(description="项目列表")
     count: int = Field(description="项目总数")
 
 
@@ -166,7 +166,7 @@ class TaskUpdate(TaskBase):
 # 任务表 task
 class Task(TaskBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, description="任务ID")
-    item_id: uuid.UUID = Field(foreign_key="item.id", description="所属项目ID")
+    project_id: uuid.UUID = Field(foreign_key="project.id", description="所属项目ID")
     owner_id: uuid.UUID = Field(foreign_key="user.id", index=True, description="所有者ID")
     created_at: datetime = Field(default_factory=get_beijing_time, description="创建时间")
     updated_at: datetime = Field(
@@ -174,7 +174,7 @@ class Task(TaskBase, table=True):
         sa_column_kwargs={"onupdate": get_beijing_time},
         description="更新时间"
     )
-    item: "Item" = Relationship(back_populates="tasks")  # 与 Item 的关系
+    project: "Project" = Relationship(back_populates="tasks")  # 与 Project 的关系
     owner: "User" = Relationship(back_populates="owned_tasks")  # 与 User 的关系
     # 协作者关系 - 多对多
     collaborators: list["User"] = Relationship(
@@ -185,7 +185,7 @@ class Task(TaskBase, table=True):
 
 class TaskPublic(TaskBase):
     id: uuid.UUID = Field(description="任务ID")
-    item_id: uuid.UUID = Field(description="所属项目ID")
+    project_id: uuid.UUID = Field(description="所属项目ID")
     owner_id: uuid.UUID = Field(description="所有者ID")
     created_at: datetime = Field(description="创建时间")
     updated_at: datetime = Field(description="更新时间")

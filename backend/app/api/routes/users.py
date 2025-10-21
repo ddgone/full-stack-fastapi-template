@@ -24,7 +24,7 @@ from app.models import (
     UserUpdate,
     UserUpdateMe,
     Message,
-    Item
+    Project
 )
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -220,7 +220,7 @@ def delete_user(
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
-    statement = delete(Item).where(col(Item.owner_id) == user_id)
+    statement = delete(Project).where(col(Project.owner_id) == user_id)
     session.exec(statement)  # type: ignore
     session.delete(user)
     session.commit()

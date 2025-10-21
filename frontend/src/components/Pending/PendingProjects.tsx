@@ -6,7 +6,7 @@ import { SkeletonText } from "../ui/skeleton"
  *
  * 在数据加载过程中显示骨架屏效果，提升用户体验
  */
-const PendingItems = () => (
+const PendingProjects = () => (
   <Table.Root
     size={{ base: "sm", md: "md" }} // 响应式尺寸
   >
@@ -50,4 +50,4 @@ const PendingItems = () => (
   </Table.Root>
 )
 
-export default PendingItems
+export default PendingProjects

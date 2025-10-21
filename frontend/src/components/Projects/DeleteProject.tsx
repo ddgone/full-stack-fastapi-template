@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { FiTrash2 } from "react-icons/fi"
 
-import { ItemsService } from "@/client"
+import { ProjectsService } from "@/client"
 import {
   DialogActionTrigger,
   DialogBody,
@@ -24,7 +24,7 @@ import useCustomToast from "@/hooks/useCustomToast"
  *
  * @param id 要删除的项目ID
  */
-const DeleteItem = ({ id }: { id: string }) => {
+const DeleteProject = ({ id }: { id: string }) => {
   // 对话框打开状态
   const [isOpen, setIsOpen] = useState(false)
 
@@ -44,13 +44,13 @@ const DeleteItem = ({ id }: { id: string }) => {
    * 删除项目API调用
    * @param id 项目ID
    */
-  const deleteItem = async (id: string) => {
-    await ItemsService.deleteItem({ id })
+  const deleteProject = async (id: string) => {
+    await ProjectsService.deleteProject({ id })
   }
 
   // 删除项目Mutation
   const mutation = useMutation({
-    mutationFn: deleteItem, // 使用删除函数
+    mutationFn: deleteProject, // 使用删除函数
     onSuccess: () => {
       // 删除成功处理
       showSuccessToast("项目删除成功")
@@ -62,7 +62,7 @@ const DeleteItem = ({ id }: { id: string }) => {
     },
     onSettled: () => {
       // 无论成功失败都刷新项目列表
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries({ queryKey: ["projects"] })
     },
   })
 
@@ -133,4 +133,4 @@ const DeleteItem = ({ id }: { id: string }) => {
   )
 }
 
-export default DeleteItem
+export default DeleteProject

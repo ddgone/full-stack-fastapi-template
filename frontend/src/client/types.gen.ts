@@ -13,34 +13,21 @@ export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
 
-export type ItemCreate = {
-    title: string;
-    description?: (string | null);
-};
-
-export type ItemPublic = {
-    title: string;
-    description?: (string | null);
-    id: string;
-    owner_id: string;
-};
-
-export type ItemsPublic = {
-    data: Array<ItemPublic>;
-    count: number;
-};
-
-export type ItemUpdate = {
-    title?: (string | null);
-    description?: (string | null);
-};
-
 export type Message = {
+    /**
+     * 操作消息
+     */
     message: string;
 };
 
 export type NewPassword = {
+    /**
+     * 密码重置令牌
+     */
     token: string;
+    /**
+     * 新密码
+     */
     new_password: string;
 };
 
@@ -51,53 +38,263 @@ export type PrivateUserCreate = {
     is_verified?: boolean;
 };
 
+export type ProjectCreate = {
+    /**
+     * 项目标题
+     */
+    title: string;
+    /**
+     * 项目描述
+     */
+    description?: (string | null);
+};
+
+export type ProjectPublic = {
+    /**
+     * 项目标题
+     */
+    title: string;
+    /**
+     * 项目描述
+     */
+    description?: (string | null);
+    /**
+     * 项目ID
+     */
+    id: string;
+    /**
+     * 所有者ID
+     */
+    owner_id: string;
+};
+
+export type ProjectsPublic = {
+    /**
+     * 项目列表
+     */
+    data: Array<ProjectPublic>;
+    /**
+     * 项目总数
+     */
+    count: number;
+};
+
+export type ProjectUpdate = {
+    /**
+     * 更新标题
+     */
+    title?: (string | null);
+    /**
+     * 项目描述
+     */
+    description?: (string | null);
+};
+
+export type TaskCreate = {
+    /**
+     * 任务标题
+     */
+    title: string;
+    /**
+     * 任务描述
+     */
+    description?: (string | null);
+    /**
+     * 任务状态，默认为待处理
+     */
+    status?: TaskStatus;
+    /**
+     * 任务优先级，默认为中
+     */
+    priority?: TaskPriority;
+    /**
+     * 截止日期
+     */
+    due_date?: (string | null);
+};
+
+/**
+ * 任务优先级枚举
+ */
+export type TaskPriority = 'low' | 'medium' | 'high';
+
+export type TaskPublic = {
+    /**
+     * 任务标题
+     */
+    title: string;
+    /**
+     * 任务描述
+     */
+    description?: (string | null);
+    /**
+     * 任务状态，默认为待处理
+     */
+    status?: TaskStatus;
+    /**
+     * 任务优先级，默认为中
+     */
+    priority?: TaskPriority;
+    /**
+     * 截止日期
+     */
+    due_date?: (string | null);
+    /**
+     * 任务ID
+     */
+    id: string;
+    /**
+     * 所属项目ID
+     */
+    project_id: string;
+    /**
+     * 所有者ID
+     */
+    owner_id: string;
+    /**
+     * 创建时间
+     */
+    created_at: string;
+    /**
+     * 更新时间
+     */
+    updated_at: string;
+    /**
+     * 协作者列表
+     */
+    collaborators?: Array<UserPublic>;
+};
+
+/**
+ * 任务状态枚举
+ */
+export type TaskStatus = 'pending' | 'in_progress' | 'completed';
+
 export type Token = {
+    /**
+     * JWT访问令牌
+     */
     access_token: string;
+    /**
+     * 令牌类型
+     */
     token_type?: string;
 };
 
 export type UpdatePassword = {
+    /**
+     * 当前密码
+     */
     current_password: string;
+    /**
+     * 新密码
+     */
     new_password: string;
 };
 
 export type UserCreate = {
+    /**
+     * 用户邮箱
+     */
     email: string;
+    /**
+     * 账户激活状态
+     */
     is_active?: boolean;
+    /**
+     * 管理员权限
+     */
     is_superuser?: boolean;
+    /**
+     * 用户全名
+     */
     full_name?: (string | null);
+    /**
+     * 用户密码
+     */
     password: string;
 };
 
 export type UserPublic = {
+    /**
+     * 用户邮箱
+     */
     email: string;
+    /**
+     * 账户激活状态
+     */
     is_active?: boolean;
+    /**
+     * 管理员权限
+     */
     is_superuser?: boolean;
+    /**
+     * 用户全名
+     */
     full_name?: (string | null);
+    /**
+     * 用户ID
+     */
     id: string;
 };
 
 export type UserRegister = {
+    /**
+     * 注册邮箱
+     */
     email: string;
+    /**
+     * 注册密码
+     */
     password: string;
+    /**
+     * 用户全名
+     */
     full_name?: (string | null);
 };
 
 export type UsersPublic = {
+    /**
+     * 用户列表
+     */
     data: Array<UserPublic>;
+    /**
+     * 用户总数
+     */
     count: number;
 };
 
 export type UserUpdate = {
+    /**
+     * 更新邮箱
+     */
     email?: (string | null);
+    /**
+     * 账户激活状态
+     */
     is_active?: boolean;
+    /**
+     * 管理员权限
+     */
     is_superuser?: boolean;
+    /**
+     * 用户全名
+     */
     full_name?: (string | null);
+    /**
+     * 更新密码
+     */
     password?: (string | null);
 };
 
 export type UserUpdateMe = {
+    /**
+     * 更新全名
+     */
     full_name?: (string | null);
+    /**
+     * 更新邮箱
+     */
     email?: (string | null);
 };
 
@@ -106,38 +303,6 @@ export type ValidationError = {
     msg: string;
     type: string;
 };
-
-export type ItemsReadItemsData = {
-    limit?: number;
-    skip?: number;
-};
-
-export type ItemsReadItemsResponse = (ItemsPublic);
-
-export type ItemsCreateItemData = {
-    requestBody: ItemCreate;
-};
-
-export type ItemsCreateItemResponse = (ItemPublic);
-
-export type ItemsReadItemData = {
-    id: string;
-};
-
-export type ItemsReadItemResponse = (ItemPublic);
-
-export type ItemsUpdateItemData = {
-    id: string;
-    requestBody: ItemUpdate;
-};
-
-export type ItemsUpdateItemResponse = (ItemPublic);
-
-export type ItemsDeleteItemData = {
-    id: string;
-};
-
-export type ItemsDeleteItemResponse = (Message);
 
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;
@@ -170,6 +335,45 @@ export type PrivateCreateUserData = {
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type ProjectsReadProjectsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type ProjectsReadProjectsResponse = (ProjectsPublic);
+
+export type ProjectsCreateProjectData = {
+    requestBody: ProjectCreate;
+};
+
+export type ProjectsCreateProjectResponse = (ProjectPublic);
+
+export type ProjectsReadProjectData = {
+    id: string;
+};
+
+export type ProjectsReadProjectResponse = (ProjectPublic);
+
+export type ProjectsUpdateProjectData = {
+    id: string;
+    requestBody: ProjectUpdate;
+};
+
+export type ProjectsUpdateProjectResponse = (ProjectPublic);
+
+export type ProjectsDeleteProjectData = {
+    id: string;
+};
+
+export type ProjectsDeleteProjectResponse = (Message);
+
+export type TasksCreateTaskData = {
+    itemId: string;
+    requestBody: TaskCreate;
+};
+
+export type TasksCreateTaskResponse = (TaskPublic);
 
 export type UsersReadUsersData = {
     limit?: number;

@@ -10,7 +10,7 @@
     - 🔍 [Pydantic](https://docs.pydantic.dev) 用于数据验证和配置管理（由 FastAPI 调用）。
     - 💾 [PostgreSQL](https://www.postgresql.org) 作为 SQL 数据库。
 - 🚀 [React](https://react.dev) 用于前端开发。
-    - 💃 采用 TypeScript、钩子、Vite 等现代前端技术栈组件。
+    - 💃 采用 TypeScript、hooks、Vite 等现代前端技术栈组件。
     - 🎨 [Chakra UI](https://chakra-ui.com) 提供前端组件库。
     - 🤖 自动生成前端客户端。
     - 🧪 [Playwright](https://playwright.dev) 用于端到端测试。

@@ -11,10 +11,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { FiSearch } from "react-icons/fi"
 import { z } from "zod"
 
-import { ItemsService } from "@/client"
-import { ItemActionsMenu } from "@/components/Common/ItemActionsMenu"
-import AddItem from "@/components/Items/AddItem"
-import PendingItems from "@/components/Pending/PendingItems"
+import { ProjectsService } from "@/client"
+import { ProjectActionsMenu } from "@/components/Common/ProjectActionsMenu.tsx"
+import AddProject from "@/components/Projects/AddProject.tsx"
+import PendingProjects from "@/components/Pending/PendingProjects.tsx"
 import {
   PaginationItems,
   PaginationNextTrigger,
@@ -23,58 +23,58 @@ import {
 } from "@/components/ui/pagination.tsx"
 
 /**
- * 物品搜索参数验证模式
+ * 项目搜索参数验证模式
  *
  * 定义URL搜索参数的结构和默认值
  */
-const itemsSearchSchema = z.object({
+const projectsSearchSchema = z.object({
   page: z.number().catch(1), // 页码，默认为1
 })
 
 /**
- * 每页显示物品数量
+ * 每页显示项目数量
  */
 const PER_PAGE = 5
 
 /**
- * 获取物品查询选项
+ * 获取项目查询选项
  *
  * @param page 当前页码
  * @returns 查询选项对象
  */
-function getItemsQueryOptions({ page }: { page: number }) {
+function getProjectsQueryOptions({ page }: { page: number }) {
   return {
     queryFn: () =>
-      ItemsService.readItems({
+      ProjectsService.readProjects({
         skip: (page - 1) * PER_PAGE, // 计算跳过数量
         limit: PER_PAGE // 每页数量
       }),
-    queryKey: ["items", { page }], // 查询键
+    queryKey: ["projects", { page }], // 查询键
   }
 }
 
 /**
- * 创建物品路由
+ * 创建项目路由
  */
-export const Route = createFileRoute("/_layout/items")({
-  component: Items, // 路由组件
-  validateSearch: (search) => itemsSearchSchema.parse(search), // 验证搜索参数
+export const Route = createFileRoute("/_layout/projects")({
+  component: Projects, // 路由组件
+  validateSearch: (search) => projectsSearchSchema.parse(search), // 验证搜索参数
 })
 
 /**
- * 物品表格组件
+ * 项目表格组件
  *
- * 显示物品列表和分页控件
+ * 显示项目列表和分页控件
  */
-function ItemsTable() {
+function ProjectsTable() {
   // 导航函数
   const navigate = useNavigate({ from: Route.fullPath })
   // 从URL获取当前页码
   const { page } = Route.useSearch()
 
-  // 物品查询
+  // 项目查询
   const { data, isLoading, isPlaceholderData } = useQuery({
-    ...getItemsQueryOptions({ page }), // 查询选项
+    ...getProjectsQueryOptions({ page }), // 查询选项
     placeholderData: (prevData) => prevData, // 使用之前的数据作为占位
   })
 
@@ -84,23 +84,23 @@ function ItemsTable() {
    */
   const setPage = (page: number) => {
     navigate({
-      to: "/items",
+      to: "/projects",
       search: (prev) => ({ ...prev, page }), // 更新URL中的页码
     })
   }
 
-  // 当前页物品列表
-  const items = data?.data.slice(0, PER_PAGE) ?? []
-  // 物品总数
+  // 当前页项目列表
+  const projects = data?.data.slice(0, PER_PAGE) ?? []
+  // 项目总数
   const count = data?.count ?? 0
 
   // 加载状态显示骨架屏
   if (isLoading) {
-    return <PendingItems />
+    return <PendingProjects />
   }
 
-  // 无物品时显示空状态
-  if (items.length === 0) {
+  // 无项目时显示空状态
+  if (projects.length === 0) {
     return (
       <EmptyState.Root>
         <EmptyState.Content>
@@ -108,9 +108,9 @@ function ItemsTable() {
             <FiSearch />
           </EmptyState.Indicator>
           <VStack textAlign="center">
-            <EmptyState.Title>暂无物品</EmptyState.Title>
+            <EmptyState.Title>暂无项目</EmptyState.Title>
             <EmptyState.Description>
-              添加新物品以开始管理
+              添加新项目以开始管理
             </EmptyState.Description>
           </VStack>
         </EmptyState.Content>
@@ -120,7 +120,7 @@ function ItemsTable() {
 
   return (
     <>
-      {/* 物品表格 */}
+      {/* 项目表格 */}
       <Table.Root size={{ base: "sm", md: "md" }}>
         <Table.Header>
           <Table.Row>
@@ -131,27 +131,27 @@ function ItemsTable() {
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {items?.map((item) => (
+          {projects?.map((project) => (
             <Table.Row
-              key={item.id}
+              key={project.id}
               opacity={isPlaceholderData ? 0.5 : 1} // 占位数据时降低透明度
             >
               <Table.Cell truncate maxW="sm">
-                {item.id}
+                {project.id}
               </Table.Cell>
               <Table.Cell truncate maxW="sm">
-                {item.title}
+                {project.title}
               </Table.Cell>
               <Table.Cell
-                color={!item.description ? "gray" : "inherit"} // 无描述时显示灰色
+                color={!project.description ? "gray" : "inherit"} // 无描述时显示灰色
                 truncate
                 maxW="30%"
               >
-                {item.description || "无描述"} {/* 无描述时显示"无描述" */}
+                {project.description || "无描述"} {/* 无描述时显示"无描述" */}
               </Table.Cell>
               <Table.Cell>
-                {/* 物品操作菜单 */}
-                <ItemActionsMenu item={item} />
+                {/* 项目操作菜单 */}
+                <ProjectActionsMenu project={project} />
               </Table.Cell>
             </Table.Row>
           ))}
@@ -161,7 +161,7 @@ function ItemsTable() {
       {/* 分页控件 */}
       <Flex justifyContent="flex-end" mt={4}>
         <PaginationRoot
-          count={count} // 物品总数
+          count={count} // 项目总数
           pageSize={PER_PAGE} // 每页数量
           onPageChange={({ page }) => setPage(page)} // 页码变化回调
         >
@@ -177,21 +177,21 @@ function ItemsTable() {
 }
 
 /**
- * 物品管理页面组件
+ * 项目管理页面组件
  */
-function Items() {
+function Projects() {
   return (
     <Container maxW="full">
       {/* 页面标题 */}
       <Heading size="lg" pt={12}>
-        物品管理
+        项目管理
       </Heading>
 
-      {/* 添加物品按钮 */}
-      <AddItem />
+      {/* 添加项目按钮 */}
+      <AddProject />
 
-      {/* 物品表格 */}
-      <ItemsTable />
+      {/* 项目表格 */}
+      <ProjectsTable />
     </Container>
   )
 }

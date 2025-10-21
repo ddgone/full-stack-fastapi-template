@@ -13,7 +13,7 @@ import type { UserPublic } from "@/client"
  */
 const items = [
   { icon: FiHome, title: "仪表盘", path: "/" },
-  { icon: FiBriefcase, title: "项目管理", path: "/items" },
+  { icon: FiBriefcase, title: "项目管理", path: "/projects" },
   { icon: FiSettings, title: "用户设置", path: "/settings" },
 ]
 

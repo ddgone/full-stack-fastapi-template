@@ -9,7 +9,7 @@ from app.models import (
     TaskCreate,
     TaskUpdate,
     Task,
-    Item
+    Project
 )
 
 router = APIRouter(prefix="/items", tags=["tasks"])
@@ -23,7 +23,7 @@ def create_task(
         task_data: TaskCreate
 ) -> Any:
     # 检查用户是否有权限在 item 下创建 task
-    item = session.get(Item, item_id)
+    item = session.get(Project, item_id)
     if not item:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
 
@@ -42,13 +42,17 @@ def create_task(
     return task
 
 
-@router.put("/{item_id}/tasks/{task_id}", response_model=TasksPublic)
-def update_task(
-        session: SessionDep,
-        current_user: CurrentUser,
-        item_id: uuid.UUID,
-        task_id: uuid.UUID,
-        task_data: TaskUpdate
-) -> Any:
-    # 检查用户是否有权限更新 task
-    item = session.get(Item, item_id)
+# @router.put("/{item_id}/tasks/{task_id}", response_model=TaskPublic)
+# def update_task(
+#         session: SessionDep,
+#         current_user: CurrentUser,
+#         item_id: uuid.UUID,
+#         task_id: uuid.UUID,
+#         task_data: TaskUpdate
+# ) -> Any:
+#     # 检查用户是否有权限编辑 task
+#     task = session.get(Task, task_id)
+#     if not task:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
+#
+#     #

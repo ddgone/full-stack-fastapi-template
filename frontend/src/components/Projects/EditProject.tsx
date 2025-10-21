@@ -1,7 +1,7 @@
 import {
   Button,
+  ButtonGroup,
   DialogActionTrigger,
-  DialogTitle,
   Input,
   Text,
   VStack,
@@ -9,10 +9,9 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FaPlus } from "react-icons/fa"
+import { FaExchangeAlt } from "react-icons/fa"
 
-import { type ItemCreate, ItemsService } from "@/client"
-import type { ApiError } from "@/client/core/ApiError"
+import { type ApiError, type ProjectPublic, ProjectsService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 import {
@@ -22,16 +21,38 @@ import {
   DialogFooter,
   DialogHeader,
   DialogRoot,
+  DialogTitle,
   DialogTrigger,
 } from "../ui/dialog"
 import { Field } from "../ui/field"
 
 /**
- * 添加项目组件
+ * 编辑项目组件属性
  *
- * 提供一个对话框表单用于创建新项目
+ * @property project 要编辑的项目对象
  */
-const AddItem = () => {
+interface EditProjectProps {
+  project: ProjectPublic
+}
+
+/**
+ * 项目更新表单类型
+ *
+ * 定义编辑项目时需要的字段
+ */
+interface ProjectUpdateForm {
+  title: string
+  description?: string
+}
+
+/**
+ * 编辑项目组件
+ *
+ * 提供一个对话框表单用于编辑现有项目信息
+ *
+ * @param project 要编辑的项目对象
+ */
+const EditProject = ({ project }: EditProjectProps) => {
   // 对话框打开状态
   const [isOpen, setIsOpen] = useState(false)
 
@@ -46,23 +67,26 @@ const AddItem = () => {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isValid, isSubmitting },
-  } = useForm<ItemCreate>({
+    formState: { errors, isSubmitting },
+  } = useForm<ProjectUpdateForm>({
     mode: "onBlur", // 在失去焦点时验证
     criteriaMode: "all", // 验证所有规则
     defaultValues: {
-      title: "",
-      description: "",
+      ...project, // 使用项目数据初始化表单
+      description: project.description ?? undefined, // 处理可能的空值
     },
   })
 
-  // 创建项目Mutation
+  // 更新项目Mutation
   const mutation = useMutation({
-    mutationFn: (data: ItemCreate) =>
-      ItemsService.createItem({ requestBody: data }),
+    mutationFn: (data: ProjectUpdateForm) =>
+      ProjectsService.updateProject({
+        id: project.id, // 项目ID
+        requestBody: data // 更新数据
+      }),
     onSuccess: () => {
-      // 创建成功处理
-      showSuccessToast("项目创建成功")
+      // 更新成功处理
+      showSuccessToast("项目更新成功")
       reset() // 重置表单
       setIsOpen(false) // 关闭对话框
     },
@@ -72,7 +96,7 @@ const AddItem = () => {
     },
     onSettled: () => {
       // 无论成功失败都刷新项目列表
-      queryClient.invalidateQueries({ queryKey: ["items"] })
+      queryClient.invalidateQueries({ queryKey: ["projects"] })
     },
   })
 
@@ -80,7 +104,7 @@ const AddItem = () => {
    * 表单提交处理函数
    * @param data 表单数据
    */
-  const onSubmit: SubmitHandler<ItemCreate> = (data) => {
+  const onSubmit: SubmitHandler<ProjectUpdateForm> = async (data) => {
     mutation.mutate(data)
   }
 
@@ -93,9 +117,9 @@ const AddItem = () => {
     >
       {/* 对话框触发按钮 */}
       <DialogTrigger asChild>
-        <Button value="add-item" my={4}>
-          <FaPlus fontSize="16px" />
-          添加项目
+        <Button variant="ghost">
+          <FaExchangeAlt fontSize="16px" />
+          编辑项目
         </Button>
       </DialogTrigger>
 
@@ -104,11 +128,11 @@ const AddItem = () => {
         {/* 表单容器 */}
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>添加项目</DialogTitle>
+            <DialogTitle>编辑项目</DialogTitle>
           </DialogHeader>
 
           <DialogBody>
-            <Text mb={4}>填写以下信息以添加新项目</Text>
+            <Text mb={4}>请在下方更新项目信息</Text>
 
             {/* 表单字段组 */}
             <VStack gap={4}>
@@ -145,23 +169,24 @@ const AddItem = () => {
 
           {/* 对话框底部操作按钮 */}
           <DialogFooter gap={2}>
-            <DialogActionTrigger asChild>
+            <ButtonGroup>
+              <DialogActionTrigger asChild>
+                <Button
+                  variant="subtle"
+                  colorPalette="gray"
+                  disabled={isSubmitting}
+                >
+                  取消
+                </Button>
+              </DialogActionTrigger>
               <Button
-                variant="subtle"
-                colorPalette="gray"
-                disabled={isSubmitting}
+                variant="solid"
+                type="submit"
+                loading={isSubmitting}
               >
-                取消
+                保存
               </Button>
-            </DialogActionTrigger>
-            <Button
-              variant="solid"
-              type="submit"
-              disabled={!isValid} // 表单无效时禁用
-              loading={isSubmitting} // 提交中显示加载状态
-            >
-              保存
-            </Button>
+            </ButtonGroup>
           </DialogFooter>
         </form>
 
@@ -172,4 +197,4 @@ const AddItem = () => {
   )
 }
 
-export default AddItem
+export default EditProject

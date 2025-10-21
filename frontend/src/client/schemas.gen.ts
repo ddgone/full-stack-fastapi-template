@@ -69,124 +69,12 @@ export const HTTPValidationErrorSchema = {
     title: 'HTTPValidationError'
 } as const;
 
-export const ItemCreateSchema = {
-    properties: {
-        title: {
-            type: 'string',
-            maxLength: 255,
-            minLength: 1,
-            title: 'Title'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        }
-    },
-    type: 'object',
-    required: ['title'],
-    title: 'ItemCreate'
-} as const;
-
-export const ItemPublicSchema = {
-    properties: {
-        title: {
-            type: 'string',
-            maxLength: 255,
-            minLength: 1,
-            title: 'Title'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        },
-        id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Id'
-        },
-        owner_id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Owner Id'
-        }
-    },
-    type: 'object',
-    required: ['title', 'id', 'owner_id'],
-    title: 'ItemPublic'
-} as const;
-
-export const ItemUpdateSchema = {
-    properties: {
-        title: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255,
-                    minLength: 1
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Title'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        }
-    },
-    type: 'object',
-    title: 'ItemUpdate'
-} as const;
-
-export const ItemsPublicSchema = {
-    properties: {
-        data: {
-            items: {
-                '$ref': '#/components/schemas/ItemPublic'
-            },
-            type: 'array',
-            title: 'Data'
-        },
-        count: {
-            type: 'integer',
-            title: 'Count'
-        }
-    },
-    type: 'object',
-    required: ['data', 'count'],
-    title: 'ItemsPublic'
-} as const;
-
 export const MessageSchema = {
     properties: {
         message: {
             type: 'string',
-            title: 'Message'
+            title: 'Message',
+            description: '操作消息'
         }
     },
     type: 'object',
@@ -198,13 +86,15 @@ export const NewPasswordSchema = {
     properties: {
         token: {
             type: 'string',
-            title: 'Token'
+            title: 'Token',
+            description: '密码重置令牌'
         },
         new_password: {
             type: 'string',
-            maxLength: 40,
+            maxLength: 128,
             minLength: 8,
-            title: 'New Password'
+            title: 'New Password',
+            description: '新密码'
         }
     },
     type: 'object',
@@ -237,15 +127,295 @@ export const PrivateUserCreateSchema = {
     title: 'PrivateUserCreate'
 } as const;
 
+export const ProjectCreateSchema = {
+    properties: {
+        title: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Title',
+            description: '项目标题'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description',
+            description: '项目描述'
+        }
+    },
+    type: 'object',
+    required: ['title'],
+    title: 'ProjectCreate'
+} as const;
+
+export const ProjectPublicSchema = {
+    properties: {
+        title: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Title',
+            description: '项目标题'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description',
+            description: '项目描述'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id',
+            description: '项目ID'
+        },
+        owner_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Owner Id',
+            description: '所有者ID'
+        }
+    },
+    type: 'object',
+    required: ['title', 'id', 'owner_id'],
+    title: 'ProjectPublic'
+} as const;
+
+export const ProjectUpdateSchema = {
+    properties: {
+        title: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255,
+                    minLength: 1
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Title',
+            description: '更新标题'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description',
+            description: '项目描述'
+        }
+    },
+    type: 'object',
+    title: 'ProjectUpdate'
+} as const;
+
+export const ProjectsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ProjectPublic'
+            },
+            type: 'array',
+            title: 'Data',
+            description: '项目列表'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count',
+            description: '项目总数'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ProjectsPublic'
+} as const;
+
+export const TaskCreateSchema = {
+    properties: {
+        title: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Title',
+            description: '任务标题'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description',
+            description: '任务描述'
+        },
+        status: {
+            '$ref': '#/components/schemas/TaskStatus',
+            description: '任务状态，默认为待处理',
+            default: 'pending'
+        },
+        priority: {
+            '$ref': '#/components/schemas/TaskPriority',
+            description: '任务优先级，默认为中',
+            default: 'medium'
+        },
+        due_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Due Date',
+            description: '截止日期'
+        }
+    },
+    type: 'object',
+    required: ['title'],
+    title: 'TaskCreate'
+} as const;
+
+export const TaskPrioritySchema = {
+    type: 'string',
+    enum: ['low', 'medium', 'high'],
+    title: 'TaskPriority',
+    description: '任务优先级枚举'
+} as const;
+
+export const TaskPublicSchema = {
+    properties: {
+        title: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Title',
+            description: '任务标题'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description',
+            description: '任务描述'
+        },
+        status: {
+            '$ref': '#/components/schemas/TaskStatus',
+            description: '任务状态，默认为待处理',
+            default: 'pending'
+        },
+        priority: {
+            '$ref': '#/components/schemas/TaskPriority',
+            description: '任务优先级，默认为中',
+            default: 'medium'
+        },
+        due_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Due Date',
+            description: '截止日期'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id',
+            description: '任务ID'
+        },
+        project_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Project Id',
+            description: '所属项目ID'
+        },
+        owner_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Owner Id',
+            description: '所有者ID'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At',
+            description: '创建时间'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At',
+            description: '更新时间'
+        },
+        collaborators: {
+            items: {
+                '$ref': '#/components/schemas/UserPublic'
+            },
+            type: 'array',
+            title: 'Collaborators',
+            description: '协作者列表',
+            default: []
+        }
+    },
+    type: 'object',
+    required: ['title', 'id', 'project_id', 'owner_id', 'created_at', 'updated_at'],
+    title: 'TaskPublic'
+} as const;
+
+export const TaskStatusSchema = {
+    type: 'string',
+    enum: ['pending', 'in_progress', 'completed'],
+    title: 'TaskStatus',
+    description: '任务状态枚举'
+} as const;
+
 export const TokenSchema = {
     properties: {
         access_token: {
             type: 'string',
-            title: 'Access Token'
+            title: 'Access Token',
+            description: 'JWT访问令牌'
         },
         token_type: {
             type: 'string',
             title: 'Token Type',
+            description: '令牌类型',
             default: 'bearer'
         }
     },
@@ -258,15 +428,17 @@ export const UpdatePasswordSchema = {
     properties: {
         current_password: {
             type: 'string',
-            maxLength: 40,
+            maxLength: 128,
             minLength: 8,
-            title: 'Current Password'
+            title: 'Current Password',
+            description: '当前密码'
         },
         new_password: {
             type: 'string',
-            maxLength: 40,
+            maxLength: 128,
             minLength: 8,
-            title: 'New Password'
+            title: 'New Password',
+            description: '新密码'
         }
     },
     type: 'object',
@@ -280,16 +452,19 @@ export const UserCreateSchema = {
             type: 'string',
             maxLength: 255,
             format: 'email',
-            title: 'Email'
+            title: 'Email',
+            description: '用户邮箱'
         },
         is_active: {
             type: 'boolean',
             title: 'Is Active',
+            description: '账户激活状态',
             default: true
         },
         is_superuser: {
             type: 'boolean',
             title: 'Is Superuser',
+            description: '管理员权限',
             default: false
         },
         full_name: {
@@ -302,13 +477,15 @@ export const UserCreateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Full Name'
+            title: 'Full Name',
+            description: '用户全名'
         },
         password: {
             type: 'string',
-            maxLength: 40,
+            maxLength: 128,
             minLength: 8,
-            title: 'Password'
+            title: 'Password',
+            description: '用户密码'
         }
     },
     type: 'object',
@@ -322,16 +499,19 @@ export const UserPublicSchema = {
             type: 'string',
             maxLength: 255,
             format: 'email',
-            title: 'Email'
+            title: 'Email',
+            description: '用户邮箱'
         },
         is_active: {
             type: 'boolean',
             title: 'Is Active',
+            description: '账户激活状态',
             default: true
         },
         is_superuser: {
             type: 'boolean',
             title: 'Is Superuser',
+            description: '管理员权限',
             default: false
         },
         full_name: {
@@ -344,12 +524,14 @@ export const UserPublicSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Full Name'
+            title: 'Full Name',
+            description: '用户全名'
         },
         id: {
             type: 'string',
             format: 'uuid',
-            title: 'Id'
+            title: 'Id',
+            description: '用户ID'
         }
     },
     type: 'object',
@@ -363,13 +545,15 @@ export const UserRegisterSchema = {
             type: 'string',
             maxLength: 255,
             format: 'email',
-            title: 'Email'
+            title: 'Email',
+            description: '注册邮箱'
         },
         password: {
             type: 'string',
-            maxLength: 40,
+            maxLength: 128,
             minLength: 8,
-            title: 'Password'
+            title: 'Password',
+            description: '注册密码'
         },
         full_name: {
             anyOf: [
@@ -381,7 +565,8 @@ export const UserRegisterSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Full Name'
+            title: 'Full Name',
+            description: '用户全名'
         }
     },
     type: 'object',
@@ -402,16 +587,19 @@ export const UserUpdateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Email'
+            title: 'Email',
+            description: '更新邮箱'
         },
         is_active: {
             type: 'boolean',
             title: 'Is Active',
+            description: '账户激活状态',
             default: true
         },
         is_superuser: {
             type: 'boolean',
             title: 'Is Superuser',
+            description: '管理员权限',
             default: false
         },
         full_name: {
@@ -424,20 +612,22 @@ export const UserUpdateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Full Name'
+            title: 'Full Name',
+            description: '用户全名'
         },
         password: {
             anyOf: [
                 {
                     type: 'string',
-                    maxLength: 40,
+                    maxLength: 128,
                     minLength: 8
                 },
                 {
                     type: 'null'
                 }
             ],
-            title: 'Password'
+            title: 'Password',
+            description: '更新密码'
         }
     },
     type: 'object',
@@ -456,7 +646,8 @@ export const UserUpdateMeSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Full Name'
+            title: 'Full Name',
+            description: '更新全名'
         },
         email: {
             anyOf: [
@@ -469,7 +660,8 @@ export const UserUpdateMeSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Email'
+            title: 'Email',
+            description: '更新邮箱'
         }
     },
     type: 'object',
@@ -483,11 +675,13 @@ export const UsersPublicSchema = {
                 '$ref': '#/components/schemas/UserPublic'
             },
             type: 'array',
-            title: 'Data'
+            title: 'Data',
+            description: '用户列表'
         },
         count: {
             type: 'integer',
-            title: 'Count'
+            title: 'Count',
+            description: '用户总数'
         }
     },
     type: 'object',

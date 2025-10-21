@@ -7,7 +7,7 @@ from sqlmodel import Session, select
 from app import crud
 from app.core.config import settings
 from app.core.security import verify_password
-from app.models.users import User, UserCreate
+from app.models import User, UserCreate
 from tests.utils.utils import random_email, random_lower_string
 
 
@@ -164,8 +164,8 @@ def test_retrieve_users(
 
     assert len(all_users["data"]) > 1
     assert "count" in all_users
-    for item in all_users["data"]:
-        assert "email" in item
+    for project in all_users["data"]:
+        assert "email" in project
 
 
 def test_update_user_me(

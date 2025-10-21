@@ -1,17 +1,17 @@
 import { IconButton } from "@chakra-ui/react"
 import { BsThreeDotsVertical } from "react-icons/bs"
-import type { ItemPublic } from "@/client"
-import DeleteItem from "../Items/DeleteItem"
-import EditItem from "../Items/EditItem"
+import type { ProjectPublic } from "@/client"
+import DeleteProject from "@/components/Projects/DeleteProject.tsx"
+import EditProject from "@/components/Projects/EditProject.tsx"
 import { MenuContent, MenuRoot, MenuTrigger } from "../ui/menu"
 
 /**
  * 项目操作菜单组件属性
  *
- * @property item 要操作的项目对象
+ * @property project 要操作的项目对象
  */
-interface ItemActionsMenuProps {
-  item: ItemPublic
+interface ProjectActionsMenuProps {
+  project: ProjectPublic
 }
 
 /**
@@ -19,9 +19,9 @@ interface ItemActionsMenuProps {
  *
  * 提供一个下拉菜单用于执行项目相关操作（编辑、删除）
  *
- * @param item 要操作的项目对象
+ * @param project 要操作的项目对象
  */
-export const ItemActionsMenu = ({ item }: ItemActionsMenuProps) => {
+export const ProjectActionsMenu = ({ project }: ProjectActionsMenuProps) => {
   return (
     // 菜单根组件
     <MenuRoot>
@@ -40,10 +40,10 @@ export const ItemActionsMenu = ({ item }: ItemActionsMenuProps) => {
       {/* 菜单内容 */}
       <MenuContent>
         {/* 编辑项目组件 */}
-        <EditItem item={item} />
+        <EditProject project={project} />
 
         {/* 删除项目组件 */}
-        <DeleteItem id={item.id} />
+        <DeleteProject id={project.id} />
       </MenuContent>
     </MenuRoot>
   )

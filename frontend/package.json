@@ -8,7 +8,8 @@
     "build": "tsc -p tsconfig.build.json && vite build",
     "lint": "biome check --write --unsafe --no-errors-on-unmatched --files-ignore-unknown=true ./",
     "preview": "vite preview",
-    "generate-client": "openapi-ts"
+    "generate-client": "openapi-ts",
+    "generate-routes": "tanstack-router generate"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.27.0",
@@ -29,6 +30,7 @@
     "@biomejs/biome": "^2.2.4",
     "@hey-api/openapi-ts": "0.73.0",
     "@playwright/test": "^1.55.0",
+    "@tanstack/router-cli": "^1.133.20",
     "@tanstack/router-devtools": "^1.131.42",
     "@tanstack/router-plugin": "^1.132.41",
     "@types/node": "^24.5.2",
