@@ -4,7 +4,9 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from sqlmodel import func, select
 
-from app.api.deps import CurrentUser, SessionDep
+from app.api.deps.common import SessionDep
+from app.api.deps.users import CurrentUser
+
 from app.models import (
     Project,
     ProjectCreate,
@@ -14,7 +16,7 @@ from app.models import (
     Message
 )
 
-router = APIRouter(prefix="/projects", tags=["projects"])
+router = APIRouter(prefix="/projects", tags=["项目"])
 
 
 @router.get("/", response_model=ProjectsPublic)

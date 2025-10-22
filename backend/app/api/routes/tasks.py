@@ -3,15 +3,18 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.api.deps import CurrentUser, SessionDep
+from app.api.deps.common import SessionDep
+from app.api.deps.users import CurrentUser
+
 from app.models import (
     TaskPublic,
     TaskCreate,
-    Task,
     Project
 )
 
-router = APIRouter(prefix="/projects", tags=["tasks"])
+from app.crud.tasks import crud_create_task
+
+router = APIRouter(prefix="/projects", tags=["任务"])
 
 
 @router.post("/{project_id}/tasks", response_model=TaskPublic)
@@ -34,12 +37,8 @@ def create_task(
         )
 
     # 创建任务
-    task = Task(**task_data.model_dump(), project_id=project_id, owner_id=current_user.id)
-    session.add(task)
-    session.commit()
-    session.refresh(task)
+    task = crud_create_task(session=session, task_in=task_data, project_id=project_id, owner_id=current_user.id)
     return task
-
 
 # @router.put("/{project_id}/tasks/{task_id}", response_model=TaskPublic)
 # def update_task(

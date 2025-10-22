@@ -10,8 +10,11 @@ from fastapi import (
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app import crud
-from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
+from app.crud.users import crud_authenticate, crud_get_user_by_email
+
+from app.api.deps.common import SessionDep
+from app.api.deps.users import CurrentUser, get_current_active_superuser
+
 from app.core import security
 from app.core.config import settings
 from app.core.security import get_password_hash
@@ -44,7 +47,7 @@ def login_access_token(
     """
     OAuth2 兼容的令牌登录，获取访问令牌供后续请求使用
     """
-    user = crud.authenticate(
+    user = crud_authenticate(
         session=session, email=form_data.username, password=form_data.password
     )
     if not user:
@@ -70,9 +73,9 @@ def test_token(current_user: CurrentUser) -> Any:
 @router.post("/password-recovery/{email}")
 def recover_password(email: str, session: SessionDep) -> Message:
     """
-    Password Recovery
+    发起密码重置流程
     """
-    user = crud.get_user_by_email(session=session, email=email)
+    user = crud_get_user_by_email(session=session, email=email)
 
     if not user:
         raise HTTPException(
@@ -94,12 +97,12 @@ def recover_password(email: str, session: SessionDep) -> Message:
 @router.post("/reset-password/")
 def reset_password(session: SessionDep, body: NewPassword) -> Message:
     """
-    Reset password
+    重置密码
     """
     email = verify_password_reset_token(token=body.token)
     if not email:
         raise HTTPException(status_code=400, detail="Invalid token")
-    user = crud.get_user_by_email(session=session, email=email)
+    user = crud_get_user_by_email(session=session, email=email)
     if not user:
         raise HTTPException(
             status_code=404,
@@ -123,7 +126,7 @@ def recover_password_html_content(email: str, session: SessionDep) -> Any:
     """
     HTML Content for Password Recovery
     """
-    user = crud.get_user_by_email(session=session, email=email)
+    user = crud_get_user_by_email(session=session, email=email)
 
     if not user:
         raise HTTPException(
